@@ -1,7 +1,7 @@
 import { usePlugin } from './extism.tsx' // '@extism/react' is broken
 import React, { useState, useEffect } from 'react'
 
-const pluginSource = 'http://localhost:3000/greet.wasm'
+const pluginSource = `${window.location.origin}/greet.wasm`
 
 function App() {
   const [hookInput, setHookInput] = useState('')
