@@ -1,25 +1,32 @@
-import { usePlugin } from './extism.tsx' // '@extism/react' is broken
+import { usePlugin } from './extism.tsx'
 import { useState, useEffect } from 'react'
-
-const pluginSource = `${window.location.origin}/greet.wasm`
+// import Game from './Game'
+import './style.css'
 
 function App() {
-  const [hookInput, setHookInput] = useState('')
+  // return <Game />
+  const [input, setInput] = useState({
+    board: [
+      ['', '', ''],
+      ['', '', ''],
+      ['', '', ''],
+    ],
+    row: 0,
+    col: 0,
+    player: 'X',
+  })
   const [str, setStr] = useState('')
-  const {
-    plugin,
-    loading,
-    // useFunction,
-  } = usePlugin(pluginSource, { useWasi: true })
-
-  // const { output, loading } = useFunction('greet', hookInput)
+  const { plugin, loading } = usePlugin(`${window.location.origin}/app.wasm`, {
+    useWasi: true,
+  })
 
   useEffect(() => {
-    // setStr(new TextDecoder().decode(output))
-    plugin?.call('greet', hookInput).then((output: any) => {
+    const _input = JSON.stringify(input)
+    // console.log(_input)
+    plugin?.call('app', _input).then((output: any) => {
       setStr(new TextDecoder().decode(output))
     })
-  }, [plugin, hookInput])
+  }, [plugin, input])
 
   return (
     <div>
@@ -27,7 +34,13 @@ function App() {
         <p>Loading wasm...</p>
       ) : (
         <div>
-          <input onChange={(e) => setHookInput(e.target.value)} />
+          <input
+            className="input"
+            value={JSON.stringify(input)}
+            onChange={(e) => setInput(JSON.parse(e.target.value))}
+          />
+          <br />
+          <br />
           {str}
         </div>
       )}

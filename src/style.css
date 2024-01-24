@@ -1,0 +1,15 @@
+* {
+  box-sizing: border-box;
+}
+
+.float {
+  float: left;
+}
+.square {
+  padding: 50px;
+}
+
+.input {
+  width: 100%;
+  padding: 10px;
+}
