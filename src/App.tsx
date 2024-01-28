@@ -3,8 +3,6 @@ import { useState, useEffect } from 'react'
 import Game from './Game.tsx'
 import './style.css'
 
-// todo: pass string to callWasm and remove input altogether
-
 const initialState = {
   board: [
     ['', '', ''],
@@ -21,9 +19,6 @@ function App() {
     useWasi: true,
   })
 
-  // input is an object, which is stringified and sent to WASM
-  const [input, setInput] = useState(initialState)
-
   // output is the stringified object that comes back from WASM
   const [output, setOutput] = useState('')
   const [lastPlayer, setLastPlayer] = useState('X')
@@ -31,21 +26,23 @@ function App() {
   // whenever input is changed, WASM is called which then returns a new output
   useEffect(() => {
     const main = async () => {
-      const str = await callWasm()
+      const str = await callWasm(JSON.stringify(initialState))
       setOutput(str)
     }
     main()
-  }, [plugin, input])
+  }, [plugin])
 
   // this sends our stringified input to WASM and returns a new stringified object
-  const callWasm = async () => {
-    const val: any = await plugin?.call('app', JSON.stringify(input))
+  const callWasm = async (str: string) => {
+    const val: any = await plugin?.call('app', str)
     return new TextDecoder().decode(val)
   }
 
-  const handleClick = ({ row, col }: { row: number; col: number }) => {
+  const handleClick = async ({ row, col }: { row: number; col: number }) => {
     const player = lastPlayer === 'X' ? 'O' : 'X'
-    setInput({ board: display.board, row, col, player })
+    const input = { board: display.board, row, col, player }
+    const str = await callWasm(JSON.stringify(input))
+    setOutput(str)
     setLastPlayer(player)
   }
 
