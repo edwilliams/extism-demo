@@ -2,12 +2,32 @@
   box-sizing: border-box;
 }
 
+body {
+  font-family: sans-serif;
+}
+
 .flex {
   display: flex;
 }
 
 .flex-col {
   flex-direction: column;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.code-block {
+  box-shadow: 2px -2px 11px 0px #0000006e;
+  margin-bottom: 20px;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-rows: 1fr; /* Single row */
+  grid-template-columns: repeat(2, 1fr); /* Equal-width columns */
+  gap: 16px; /* Adjust the gap as needed for spacing */
 }
 
 .square {

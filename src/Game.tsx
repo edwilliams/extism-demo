@@ -1,47 +1,59 @@
-function Game({
-  board,
-  onClick,
-}: {
-  board: string[][]
-  onClick: (val: any) => void
-}) {
+import { useState } from 'react'
+import { usePlugin } from './extism.tsx'
+import Board from './Board.tsx'
+import './style.css'
+
+function App() {
+  const { plugin, loading } = usePlugin(`${window.location.origin}/app.wasm`, {
+    useWasi: true,
+  })
+
+  const [state, setState] = useState({
+    winner: '',
+    board: [
+      ['', '', ''],
+      ['', '', ''],
+      ['', '', ''],
+    ],
+    row: 0,
+    col: 0,
+    player: '',
+  })
+  const [lastPlayer, setLastPlayer] = useState('X')
+
+  // this sends our stringified input to WASM and returns a new stringified object
+  const callWasm = async (str: string) => {
+    const val: any = await plugin?.call('app', str)
+    return new TextDecoder().decode(val)
+  }
+
+  const handleClick = async ({ row, col }: { row: number; col: number }) => {
+    const player = lastPlayer === 'X' ? 'O' : 'X'
+    const input = { board: state.board, row, col, player }
+    const str = await callWasm(JSON.stringify(input))
+    setState(JSON.parse(str))
+    setLastPlayer(player)
+  }
+
+  const winner = JSON.stringify(state.winner)
+  const currentPlayer = lastPlayer === 'X' ? 'O' : 'X'
+
   return (
-    <div className="flex">
-      <div className="flex-col">
-        <div onClick={() => onClick({ row: 0, col: 0 })} className="square">
-          {board[0][0]}
+    <div>
+      {loading ? (
+        <p>Loading wasm...</p>
+      ) : (
+        <div>
+          <Board board={state.board} onClick={handleClick} />
+          {winner === '"O"' || winner === '"X"' ? (
+            <h1>Winner: {winner}</h1>
+          ) : (
+            <h3>It is {currentPlayer} players turn</h3>
+          )}
         </div>
-        <div onClick={() => onClick({ row: 1, col: 0 })} className="square">
-          {board[1][0]}
-        </div>
-        <div onClick={() => onClick({ row: 2, col: 0 })} className="square">
-          {board[2][0]}
-        </div>
-      </div>
-      <div className="flex-col">
-        <div onClick={() => onClick({ row: 0, col: 1 })} className="square">
-          {board[0][1]}
-        </div>
-        <div onClick={() => onClick({ row: 1, col: 1 })} className="square">
-          {board[1][1]}
-        </div>
-        <div onClick={() => onClick({ row: 2, col: 1 })} className="square">
-          {board[2][1]}
-        </div>
-      </div>
-      <div className="flex-col">
-        <div onClick={() => onClick({ row: 0, col: 2 })} className="square">
-          {board[0][2]}
-        </div>
-        <div onClick={() => onClick({ row: 1, col: 2 })} className="square">
-          {board[1][2]}
-        </div>
-        <div onClick={() => onClick({ row: 2, col: 2 })} className="square">
-          {board[2][2]}
-        </div>
-      </div>
+      )}
     </div>
   )
 }
 
-export default Game
+export default App
